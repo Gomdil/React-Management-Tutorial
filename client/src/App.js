@@ -7,10 +7,12 @@ import TableHead from '@material-ui/core/TableHead';
 import TableBody from '@material-ui/core/TableBody';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
-import { makeStyles } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/core/styles';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 
-const useStyle = makeStyles({
+
+const useStyle = makeStyles((theme) => ({
   root : {
     width:"100%",
     marginTop : 20,
@@ -18,8 +20,11 @@ const useStyle = makeStyles({
   },
   table:{
     minWidth : 1080
+  },
+  progress : {
+    margin:theme.spacing(2)
   }
-});
+}));
 
 
 
@@ -27,14 +32,27 @@ export default function App() {
   const  classes = useStyle();
   const [confirmedData , setConfirmedData] = useState({});
 
+  const [state1 , setState1] = useState({
+    completed : 0
+  });
+
   const callApi = async () => {
     const response = await fetch('/api/customers');
     const body = await response.json();
     return body;     
   }
 
+  const progress = () =>{
+    const { completed1 } = state1.completed;
+    setState1({
+      completed : completed1 >= 100 ? 0 : completed1 + 1
+    })
+
+  }
+
 
   useEffect(() => {
+      const timer = setInterval(progress(), 20);
       callApi()
         .then(res => setConfirmedData({customers : res}))        
         .catch(err => console.log(err));
@@ -71,7 +89,12 @@ export default function App() {
               job = {c.job}
             /> 
             )   
-            }) : ""
+            }) : 
+            <TableRow>
+              <TableCell colSpan="6" align="center">
+                <CircularProgress className={classes.progress} veriant = "determinate" value={state1.completed}/>
+              </TableCell>
+            </TableRow>
           }  
         </TableBody>
       </Table>    
